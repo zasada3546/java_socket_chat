@@ -23,8 +23,20 @@ public class ChatController {
     @FXML private Label lNick;
 
     public void logoutButtonAction() {
+        this.showLogin();
+
+        ClientConnection.logout();
+    }
+
+    public void deleteButtonAction() {
+        this.showLogin();
+
+        ClientConnection.delete();
+    }
+
+    public void showLogin() {
         Platform.runLater(() -> {
-            FXMLLoader fmxlLoader = new FXMLLoader(getClass().getResource("./resources/views/LoginView.fxml"));
+            FXMLLoader fmxlLoader = new FXMLLoader(getClass().getClassLoader().getResource("./views/LoginView.fxml"));
             Parent window = null;
             try {
                 window = (BorderPane) fmxlLoader.load();
@@ -41,8 +53,6 @@ public class ChatController {
             stage.setHeight(140);
             stage.centerOnScreen();
         });
-
-        ClientConnection.logout();
     }
 
     public void sendButtonAction() {
@@ -51,7 +61,6 @@ public class ChatController {
     }
 
     public void addMessage(String message) {
-
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("HH:mm:ss");
         LocalDateTime now = LocalDateTime.now();
 

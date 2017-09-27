@@ -21,7 +21,14 @@
             </left>
 
             <right>
-                <Button prefWidth="100" text="Выйти" onAction="#logoutButtonAction" />
+                <HBox>
+                    <Button prefWidth="100" text="Выйти" onAction="#logoutButtonAction" >
+                        <HBox.margin>
+                            <Insets right="10.0" />
+                        </HBox.margin>
+                    </Button>
+                    <Button prefWidth="100" text="Удалиться" onAction="#deleteButtonAction" />
+                </HBox>
             </right>
 
             <BorderPane.margin>

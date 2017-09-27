@@ -1,6 +1,7 @@
 # IntelliJ IDEA
 .idea
 out
+*.db
 
 ._*
 .DS_Store

@@ -9,6 +9,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.PasswordField;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -35,16 +36,30 @@ public class LoginController {
     public void showResponse(String message) {
         Platform.runLater(() -> {
             this.lResponse.setText(message);
+            this.lResponse.setTextFill(Color.web("#ff7e7e"));
         });
     }
 
     public void loginButtonAction() throws IOException {
-        FXMLLoader fmxlLoader = new FXMLLoader(getClass().getResource("./resources/views/ChatView.fxml"));
+        FXMLLoader fmxlLoader = new FXMLLoader(getClass().getClassLoader().getResource("./views/ChatView.fxml"));
         Parent window = (BorderPane) fmxlLoader.load();
         this.chatController = fmxlLoader.<ChatController>getController();
 
         ClientConnection clientConnection = new ClientConnection(tfLogin.getText(), tfPass.getText(), this.chatController);
-        Thread x = new Thread(clientConnection );
+        Thread x = new Thread(clientConnection);
+        x.start();
+
+        this.scene = new Scene(window);
+    }
+
+    public void registerButtonAction() throws IOException {
+        FXMLLoader fmxlLoader = new FXMLLoader(getClass().getClassLoader().getResource("./views/ChatView.fxml"));
+        Parent window = (BorderPane) fmxlLoader.load();
+        this.chatController = fmxlLoader.<ChatController>getController();
+
+        ClientConnection clientConnection = new ClientConnection(tfLogin.getText(), tfPass.getText(), this.chatController);
+        clientConnection.setRegister(true);
+        Thread x = new Thread(clientConnection);
         x.start();
 
         this.scene = new Scene(window);

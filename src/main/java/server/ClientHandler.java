@@ -31,6 +31,8 @@ public class ClientHandler {
                     while (true) {
                         String str = in.readUTF();
 
+                        System.out.println("<-Клиент: " + str);
+
                         if (str.startsWith("/auth ")) {
                             String[] elements = str.split(" ");
 
@@ -38,7 +40,7 @@ public class ClientHandler {
                                 String nick = server.getAuthService().getNickByLoginPass(elements[1], elements[2]);
                                 if (nick != null) {
                                     if (!server.isNickBusy(nick)) {
-                                        sendMessage("/authok " + nick);
+                                        sendMessage("/auth_ok " + nick);
 
                                         this.name = nick;
 
@@ -46,34 +48,56 @@ public class ClientHandler {
 
                                         break;
                                     } else {
-                                        sendMessage("/authfail Учётная запись уже используется");
+                                        sendMessage("/auth_fail Учётная запись уже используется");
                                     }
                                 } else {
-                                    sendMessage("/authfail Неверный логин / пароль");
+                                    sendMessage("/auth_fail Неверный логин / пароль");
                                 }
                             } else {
-                                sendMessage("/authfail Неверное кол-во параметров");
+                                sendMessage("/auth_fail Неверное кол-во параметров");
+                            }
+                        } else if (str.startsWith("/register ")) {
+                            String[] elements = str.split(" ");
+
+                            if (elements.length == 3) {
+                                String nick = server.getAuthService().addLoginPass(elements[1], elements[2]);
+                                if (nick != null) {
+                                    sendMessage("/register_ok " + nick);
+
+                                    this.name = nick;
+
+                                    setAuthorized(true);
+
+                                    break;
+                                } else {
+                                    sendMessage("/register_fail Этот логин уже занят");
+                                }
+                            } else {
+                                sendMessage("/register_fail Неверное кол-во параметров");
                             }
                         } else {
-                            sendMessage("/authfail Для начала нужна авторизация");
+                            sendMessage("/auth_fail Для начала нужна авторизация");
                         }
                     }
 
                     while (true) {
                         String str = in.readUTF();
 
+                        System.out.println("<-Клиент " + name + ": " + str);
+
                         if (str.equalsIgnoreCase("/end")) {
                             server.broadcast(str, name);
 
                             break;
-                        }
-
-                        System.out.println("Client " + name + ": " + str);
-
-                        if (str.startsWith("/w ")) {
+                        } else if (str.startsWith("/w ")) {
                             String[] elements = str.split(" ");
 
                             server.broadcast(name + " -> " + elements[1] + " (DM): " + elements[2], name, elements[1]);
+                        } else if (str.equalsIgnoreCase("/delete")) {
+                            server.getAuthService().deleteByLogin(name);
+                            server.broadcast(str, name);
+
+                            break;
                         } else {
                             server.broadcast(name + " : " + str);
                         }
@@ -97,6 +121,8 @@ public class ClientHandler {
 
     public void sendMessage(String msg) {
         try {
+            System.out.println("->Клиент" + (this.name != null ? " " + this.name : "") + ": " + msg);
+
             out.writeUTF(msg);
             out.flush();
         } catch (IOException e) {

@@ -12,29 +12,42 @@ public class ClientConnection implements Runnable {
     private static DataOutputStream out;
 
     private static String nick;
-    private String login;
-    private String pass;
+    private static String login;
+    private static String pass;
+    private Boolean register;
 
     private ChatController chatController;
 
     public ClientConnection(String login, String pass, ChatController chatController) {
-        this.login = login;
-        this.pass = pass;
+        ClientConnection.login = login;
+        ClientConnection.pass  = pass;
+
         this.chatController = chatController;
+        this.register       = false;
     }
 
-    public void login() {
-        try {
-            out.writeUTF("/auth " + this.login + " " + this.pass);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public void setRegister(Boolean register) {
+        this.register = register;
+    }
+
+    private void register() {
+        sendMessage("/register " + ClientConnection.login + " " + ClientConnection.pass);
+    }
+
+    private void login() {
+        sendMessage("/auth " + ClientConnection.login + " " + ClientConnection.pass);
     }
 
     public static void logout() {
         nick = null;
 
         sendMessage("/end");
+    }
+
+    public static void delete() {
+        nick = null;
+
+        sendMessage("/delete");
     }
 
     public static void sendMessage(String message) {
@@ -57,7 +70,11 @@ public class ClientConnection implements Runnable {
             in = new DataInputStream(socket.getInputStream());
             out = new DataOutputStream(socket.getOutputStream());
 
-            this.login();
+            if (this.register) {
+                this.register();
+            } else {
+                this.login();
+            }
 
             // Цикл для принятия сообщений
             while (socket.isConnected()) {
@@ -66,9 +83,11 @@ public class ClientConnection implements Runnable {
                 if (nick != null) {
                     if (msg.startsWith("/")) {
                         if (msg.equalsIgnoreCase("/end")) {
-                            this.logout();
-                            this.chatController.logoutButtonAction();
-                        } else if (msg.startsWith("/userlist ")) {
+                            this.chatController.showLogin();
+                        } else if (msg.equalsIgnoreCase("/delete")) {
+                            this.chatController.showLogin();
+                        } else if (msg.startsWith("/user_list ")) {
+                            // Список, где каждые элемент вида <nick>:[on|off], чтобы понимать кто в сети, а кто нет
                             String[] users = msg.split(" ");
 
                             this.chatController.updateUserList(Arrays.copyOfRange(users, 1, users.length));
@@ -79,14 +98,25 @@ public class ClientConnection implements Runnable {
                         }
                     }
                 } else {
-                    if (msg.startsWith("/authok")) {
+                    if (msg.startsWith("/auth_ok")) {
                         String[] elements = msg.split(" ");
                         nick = elements[1];
                         this.chatController.setNickLabel(nick);
 
                         LoginController.getInstance().showScene();
-                    } else if (msg.startsWith("/authfail ")) {
-                        String response = msg.substring(10);
+                    } else if (msg.startsWith("/auth_fail ")) {
+                        String response = msg.substring(11);
+                        LoginController.getInstance().showResponse(response);
+
+                        break;
+                    } else if (msg.startsWith("/register_ok ")) {
+                        String[] elements = msg.split(" ");
+                        nick = elements[1];
+                        this.chatController.setNickLabel(nick);
+
+                        LoginController.getInstance().showScene();
+                    } else if (msg.startsWith("/register_fail ")) {
+                        String response = msg.substring(15);
                         LoginController.getInstance().showResponse(response);
 
                         break;

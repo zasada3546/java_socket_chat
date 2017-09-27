@@ -7,7 +7,6 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 public class Main extends Application {
     private static Stage stage;
@@ -16,8 +15,8 @@ public class Main extends Application {
     public void start(Stage primaryStage) throws Exception {
         stage = primaryStage;
 
-        Parent root = FXMLLoader.load(getClass().getResource("./resources/views/LoginView.fxml"));
-        Image image = new Image(getClass().getResourceAsStream("./resources/images/chat.png"));
+        Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("./views/LoginView.fxml"));
+        Image image = new Image(getClass().getClassLoader().getResourceAsStream("./images/chat.png"));
 
         primaryStage.setTitle("Сокет-чат");
         primaryStage.getIcons().add(image);

@@ -3,6 +3,7 @@ package server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Vector;
 
 public class Server {
@@ -42,6 +43,8 @@ public class Server {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+
+            authService.stop();
         }
     }
 
@@ -91,10 +94,20 @@ public class Server {
     }
 
     public void broadcastUserList() {
-        StringBuffer sb = new StringBuffer("/userlist");
+        StringBuffer sb = new StringBuffer("/user_list");
 
+        ArrayList<String> logins = this.getAuthService().getUsersList();
+
+        // В начале пишем только тех, что онлайн ...
         for (ClientHandler client: clients) {
-            sb.append(" " + client.getName());
+            sb.append(" " + client.getName() + ":on");
+            // ... по ходу дела исключая их общего списка их ...
+            logins.remove(client.getName());
+        }
+
+        // ... выводим оставших, которые оффлайн.
+        for (String login: logins) {
+            sb.append(" " + login + ":off");
         }
 
         for (ClientHandler client: clients) {
