@@ -5,6 +5,10 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.ArrayList;
 
+/**
+ * Класс для предоставления источника пользователей для чата.
+ * Как хранилище данных используется СУБД SQLite.
+ */
 public class BaseAuthService implements IAuthService {
     private static final String DATABASE_NAME = "chat.db";
 
